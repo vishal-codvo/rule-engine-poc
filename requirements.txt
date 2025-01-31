@@ -1,0 +1,9 @@
+nats-py
+asyncio
+business-rules
+psycopg2-binary
+sqlalchemy
+python-dotenv
+pytest
+pytest-asyncio
+pytest-cov 

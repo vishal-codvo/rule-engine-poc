@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - rule-engine-network
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ruleengine
+      POSTGRES_PASSWORD: ruleengine123
+      POSTGRES_DB: sensor_rules
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../src/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - rule-engine-network
+
+  rule-engine:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.python
+    depends_on:
+      - nats
+      - postgres
+    environment:
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_URL=postgresql+psycopg2://ruleengine:ruleengine123@postgres:5432/sensor_rules
+    networks:
+      - rule-engine-network
+
+networks:
+  rule-engine-network:
+    driver: bridge
+
+volumes:
+  postgres_data: 
